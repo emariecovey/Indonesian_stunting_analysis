@@ -1,0 +1,559 @@
+libname class 'C:\Users\emswen\Desktop\Stunting';
+
+/*making variable about people who had ever been educated about stunting/shorty is and 
+making variable about people who actually knew what stunting/shorty is*/
+
+data class.mother2; set class.mother;
+if i3 = 1 OR i5 = 1 then informed = 1; /*1 = people said they had ever been informed about stunting or shorty*/
+else informed = 0;
+if i4 = 1 OR i6 = 1 then knowstunt = 1; /*1 = people correctly identified what stunting/shorty was 4.67%*/
+else knowstunt = 0;
+if i7A = 1 then cause = 1; /*cause = people who correctly identified that the cause of stunting/shorty is undernourishment 14% could*/
+else cause = 0;
+run;
+
+/*informed shows that 34% of people were ever informed about stunting or shorty
+4.67% were actually right, 550 people put dwarf or height shorter than average*/
+proc freq data=class.mother2;
+tables i3*informed i5*informed informed;
+run;
+
+proc freq data=class.mother2;
+tables i4 i6 knowstunt i4*i6;
+run;
+
+proc freq data=class.mother2;
+tables i11*knowstunt i11*informed;
+run;
+
+/*cause = people who correctly identified that the cause of stunting/shorty is undernourishment*/
+proc freq data=class.mother2;
+tables i7a i7b i7c i7d i7e i7el cause;
+run; 
+
+proc contents data=class.mother;
+run;
+
+/* need to do factor analysis to see which variables to select to categorize someone's knowledge*/
+/*making section I binary*/
+data mother3; set class.mother;
+
+/*I3 & I5 informed, I4 & I6 knowstunt, I7 cause*/
+if i3 = 1 OR i5 = 1 then informed = 1; /*1 = people said they had ever been informed about stunting or shorty*/
+else informed = 0;
+if i4 = 1 OR i6 = 1 then knowstunt = 1; /*1 = people correctly identified what stunting/shorty was 4.67%*/
+else knowstunt = 0;
+
+/*I1 nourishchar, I2 malnchar */
+if informed = 1 AND i1G = 1 then nourishchar = 1; /*characteristics of a well nourished child*/
+else nourishchar = 0; 
+if informed = 1 AND i2j = 1 then malnchar = 1; /*characteristics of a malnourished child*/
+else malnchar = 0;
+
+/*I8 stuntcause I9 stuntavoid*/
+if i7a = 1 or i7b = 1 then cause = 1; /*what characteristics does stunting cause?*/
+else cause = 0;
+if i8a = 1 or i8b = 1 or i8c = 1 or i8d = 1 then stuntcause = 1; /*stunting causes what?*/
+else stuntcause = 0; 
+if i9a = 1 or i9b = 1 or i9d = 1  then stuntavoid = 1; /*what does it take to avoid stunting*/
+else stuntavoid = 0; 
+/*I10-I 12 weren't about knowledge of stunting, about where they got info*/ 
+keep informed knowstunt cause stuntcause stuntavoid; /*took out nourishchar malnchar because factor values less than .4*/
+knowledge = sum(informed, knowstunt, cause, stuntcause, stuntavoid); /*overall knowledge scale*/
+run; data mother3; set mother3;
+knowledge = sum(informed, knowstunt, cause, stuntcause, stuntavoid); /*overall knowledge scale*/
+/*wouldn't create knowledge variable in previous dataset, don't know why?*/
+if knowledge ge 5 then stunt = 2; /*very knowledgeable 5-7 questions right (81%)*/
+else if 3 le knowledge le 4 then stunt = 1; /*moderately knowledgeable 3-4 questions right (12%)*/
+else if knowledge le 3 then stunt = 0; /*not very knowledgeable 0-2 questions right (6%)*/
+run;
+
+proc freq data=mother3;
+tables stuntcause i7a*i7b stuntcause i8a i8b i8c i8d i9a i9b i9d stuntavoid;
+run;
+
+proc freq data=mother3;
+tables nourishchar malnchar informed knowstunt cause stuntcause stuntavoid knowledge stunt;
+run;
+
+proc factor data=mother3;
+/*priors smc;*/
+run;
+/*informed, cause, stuntcause, stuntavoid are all pretty decent, if you run proc factor without 
+priors smc then all variables at 40% or greater
+(40% means that 60% of correlation between variables could be error (not measuring factor))*/
+
+proc freq data = mother4;
+tables i11;
+run;
+
+proc format;
+value stunt
+0 = "0-not knowledgeable"
+1 = "1-moderately knowledgeable"
+2 = "2-knowlegeable";
+value s2tunt
+0 = "0-Not Knowledgeable"
+1 = "1-Knowledgeable";
+value who 
+1 = " Doctor"
+2 = " Nutritionist"
+3 = " Midwife"
+4 = " Nurse"
+5 = " Husband"
+6 = "Neighbor/friend"
+7 = " Internet"
+8 = " Other health personel";
+value when
+1 = " less than 3 months"
+2 = " 4-6 months"
+3 = "Over 6 months";
+run;
+
+data mother4; set class.mother;
+
+/*I3 & I5 informed, I4 & I6 knowstunt, I7 cause*/
+if i3 = 1 OR i5 = 1 then informed = 1; /*1 = people said they had ever been informed about stunting or shorty*/
+else informed = 0;
+if i4 = 1 OR i6 = 1 then knowstunt = 1; /*1 = people correctly identified what stunting/shorty was 4.67%*/
+else knowstunt = 0;
+
+/*I1 nourishchar, I2 malnchar */
+if informed = 1 AND i1G = 1 then nourishchar = 1; /*characteristics of a well nourished child*/
+else nourishchar = 0; 
+if informed = 1 AND i2j = 1 then malnchar = 1; /*characteristics of a malnourished child*/
+else malnchar = 0;
+
+/*I8 stuntcause I9 stuntavoid*/
+if i7a = 1 or i7b = 1 then cause = 1; /*what characteristics does stunting cause?*/
+else cause = 0;
+if i8a = 1 or i8b = 1 or i8c = 1 or i8d = 1 then stuntcause = 1; /*stunting causes what?*/
+else stuntcause = 0; 
+if i9a = 1 or i9b = 1 or i9d = 1  then stuntavoid = 1; /*what does it take to avoid stunting*/
+else stuntavoid = 0; 
+/*I10-I 12 weren't about knowledge of stunting, about where they got info*/ 
+knowledge = sum(informed, knowstunt, cause, stuntcause, stuntavoid); /*overall knowledge scale*/
+run; data mother4; set mother4;
+knowledge = sum(informed, knowstunt, cause, stuntcause, stuntavoid); /*overall knowledge scale*/
+/*wouldn't create knowledge variable in previous dataset, don't know why?*/
+if knowledge ge 5 then stunt = 2; /*very knowledgeable 5-7 questions right (81%)*/
+else if 3 le knowledge le 4 then stunt = 1; /*moderately knowledgeable 3-4 questions right (12%)*/
+else if knowledge le 3 then stunt = 0; /*not very knowledgeable 0-2 questions right (6%)*/
+if stunt = 0 then stunt2 = 0;
+if stunt = 1 or stunt = 2 then stunt2 = 1; /*knowledgeable and unknowledgeable - 2 groups*/
+if knowledge le 2 then stunt3 = 0; /*not knowledgable*/
+else if knowledge ge 3 then stunt3 = 1; /*knowledgable*/
+if i11 = 1 then who = 1;
+else if i11 = 2 then who = 2;
+else if i11 = 3 then who = 3;
+else if i11 = 4 then who = 4;
+else if i11 = 5 then who = 5;
+else if i11 = 6 then who = 6;
+else if i11 = 7 then who = 7;
+else if i11 = 8 then who = 8;
+else who = .;
+/*if i11 = 1 then doctor = 1;
+else doctor = 0;
+if i11 = 2 then nutritionist = 1;
+else nutritionist = 0;
+if i11 = 3 then midwife = 1;
+else midwife = 0;
+if i11 = 4 then nurse = 1;
+else nurse = 0;
+if i11 = 5 then husband = 1;
+else husband = 0;
+if i11 = 6 then friend = 1;
+else friend = 0;
+if i11 = 7 then internet = 1;
+else internet = 0;
+if i11 = 8 then otherhealth = 1;
+else otherhealth = 0;*/
+format who who. stunt stunt. stunt2 s2tunt. i10 when.;
+
+/*demographic adjustment variables*/
+if art106<14 then motherage=.;
+else if art106>50 then motherage=.;
+else motherage=art106;
+*mother's education
+0= none or less than primary graduate 
+1= primary school graduate or less than senior graduate
+2= senior graduate
+3= at least some college;
+if art108='1' then education=0;
+if art108='2' then education=0;
+if art108='3' then education=0;
+if art108='4' then education=1;
+if art108='5' then education=1;
+if art108='6' then education=1;
+if art108='7' then education=1;
+if art108='8' then education=2;
+if art108='9' then education=3;
+if art108='10' then education=3;
+if art108='11' then education=3;
+if art108='12' then education=3;
+if art108='13' then education=0;
+*D3 - who they checked their prego to
+1= trained provider = general practitioner, gynecologist, nurse, village midwife, private midwife, health center midwife 
+0= Traditional birth attendant, other, none; 
+if d3a = 1 or d3b = 1 or d3c = 1 or d3d = 1 or d3e = 1 or d3f = 1 then check = 1; 
+if d3g = 1 or d3h = 1 or d3i = 1 then check = 0; 
+*mother's occupation 
+1 = working 
+0 = not working; 
+if art109 = '1' then work = 1; 
+if art109 = '2' then work = 1;
+if art109 = '3' then work = 1;
+if art109 = '4' then work = 1;
+if art109 = '5' then work = 1;
+if art109 = '6' then work = 1;
+if art109 = '7' then work = 1;
+if art109 = '8' then work = 1;
+if art109 = '9' then work = 1;
+if art109 = '10' then work = 0;
+if art109 = '11' then work = 0;
+if art109 = '12' then work = 0; 
+*recoding SES - house equipped a3; 
+house = sum(a3a, a3b, a3c, a3d, a3e, a3f, a3g, a3h, a3i, a3j); 
+run;
+
+proc freq data=mother4;
+tables knowledge stunt3; /*22% not knowledgable, 77% knowledgable*/
+run;
+
+proc freq data=mother4; /*time still not significant chisqu*/
+tables stunt3*i10/chisq exact;
+run;
+
+proc freq data=mother4; /*who gave information very significant chisqu*/
+tables stunt3*i11/chisq;
+run;
+
+proc freq data=mother4; /*a, b, d, f, all significant (health post, health center, private midwife, andl ladies gathering, others not*/
+tables stunt3*i12a/chisq;
+run;
+proc freq data=mother4;
+tables stunt3*i12b/chisq;
+run;
+proc freq data=mother4;
+tables stunt3*i12c/chisq;
+run;
+proc freq data=mother4;
+tables stunt3*i12d/chisq;
+run;
+proc freq data=mother4;
+tables stunt3*i12e/chisq;
+run;
+proc freq data=mother4;
+tables stunt3*i12f/chisq;
+run;
+proc freq data=mother4;
+tables stunt3*i12g/chisq;
+run;
+proc freq data=mother4;
+tables stunt3*i12h/chisq;
+run;
+
+/*logistic regressions*/
+proc logistic data = mother4; /*i10 (when got knowledge) not significant*/
+class i10 education work;
+model stunt3 = i10 motherage education work house;
+run;
+
+proc logistic data = mother4; /*i11 who gave information very significant*/
+class i11 education work;
+model stunt3 = i11 motherage education work house;
+run;
+
+proc logistic data = mother4; /*where got information - health post significant*/
+class i12a education work;
+model stunt3 = i12a motherage education work house;
+run;
+
+proc logistic data = mother4; /*where got information - health center significant*/
+class i12b education work;
+model stunt3 = i12b motherage education work house;
+run;
+
+proc logistic data = mother4; /*where got information - private midwife significant*/
+class i12d education work;
+model stunt3 = i12d motherage education work house;
+run;
+
+proc logistic data = mother4; /*where got information - ladies gathering significant*/
+class i12f education work;
+model stunt3 = i12f motherage education work house;
+run;
+
+
+/*recode
+
+
+
+
+
+/***********USE THIS GRAPH************/
+proc logistic data = mother4 order=formatted; /*a, b, d significant: health center, private midwife, integrated health center*/
+class i12a i12b i12c i12d i12e i12f i12g;
+model stunt2 = i12a i12b i12c i12d i12e i12f i12g;
+label i12a = "Health Post" i12b = "Health Center" i12c = "Hospital" i12d = "Private Midwife" i12e = "Koran" i12f = "Ladies' Gathering" i12g = "Internet";
+title "112: Where did you get information about stunting/shorty?";
+run;
+
+/***********USE THIS GRAPH************/
+proc freq data=mother4;
+table i12a i12b i12c i12d i12e i12f i12g  i12a*stunt2 i12b*stunt2 i12c*stunt2 i12d*stunt2 i12e*stunt2 i12f*stunt2 i12g*stunt2;
+label i12a = "Health Post" i12b = "Health Center" i12c = "Hospital" i12d = "Private Midwife" i12e = "Koran" i12f = "Ladies' Gathering" i12g = "Internet";
+title "112: Where did you get information about stunting/shorty?";
+run;
+
+/*i12: maybe make a table of who gave the information and the p-value of the chi square test? 
+significant: health post, health center, private midwife, ladies gathering*/
+proc freq data=mother4; /*health post significant*/
+table /*i12a i12b i12c i12d i12e i12f i12g*/  i12a*stunt /chisq exact; /*i12b*stunt2 i12c*stunt2 i12d*stunt2 i12e*stunt2 i12f*stunt2 i12g*stunt2;*/
+label i12a = "Health Post" i12b = "Health Center" i12c = "Hospital" i12d = "Private Midwife" i12e = "Koran" i12f = "Ladies' Gathering" i12g = "Internet";
+title "112: Where did you get information about stunting/shorty?";
+run;
+
+proc freq data=mother4;/*health center significant*/
+table i12b*stunt2 /chisq exact;
+run;
+
+proc freq data=mother4;/*hospital not significant*/
+table i12c*stunt2 /chisq exact;
+run;
+
+proc freq data=mother4;/*private midwife significant*/
+table i12d*stunt2 /chisq exact;
+run;
+
+proc freq data=mother4;/*koran not significant*/
+table i12e*stunt2 /chisq exact;
+run;
+
+proc freq data=mother4;/*ladies gathering significant*/
+table i12f*stunt2 /chisq exact;
+run;
+
+proc freq data=mother4;/*internet not significant*/
+table i12g*stunt2 /chisq exact;
+run;
+/***********USE THIS GRAPH - i10 ************/
+proc freq data=mother4;
+table i10*stunt2 i10;
+title "110: When was the last time you got information about stunting/shorty?";
+run;
+
+proc freq data = mother4; /*chisquare is significant when you run 3 categories stunting knowledge, not 2*/
+table i10*stunt2 /chisq exact;
+run;
+
+/***********USE THIS GRAPH - i12 ************/
+proc freq data=mother4;
+table who who*stunt2 ;
+title "112: Who gave you information about stunting/shorty?";
+run;
+
+proc freq data=mother4; /*who gave information is significant with chisqu*/
+table who*stunt2 / chisq;
+title "112: Who gave you information about stunting/shorty?";
+run;
+
+/* 91% said they'd taken child to integrated health post
+81% said they'd taken child in the past month
+of 19% that didn't take child in past month, 34% said not enough time, 15% said unable to locate the post, 13% said taking care of sick child
+of 89% that did take child in past month, why they took them: 85% to weigh baby, 5% to get info, 53% immunizations, 34% health checks, 20% supplimentary food, 30% vitamins */
+Proc freq data=class.mother;
+tables e1 e2 e3 e3l e4a e4b e4c e4d e4e e4f e4g e4h e4i e4il;
+run;
+
+/*services people got from health post: 92% weighing, 9% INFORMATION, 69% immunizations, 31% supplimentary food, 41% vitamin A (helps with rapid growth),  
+only 9% got info but earlier people with information said they got info on stunting from health post*/
+Proc freq data=class.mother;
+tables e5a e5b e5c e5d e5e e5g e5h e5i e5j e5kl;
+run;
+
+/*mothers go to health post on average 5.6 times a year*/
+proc means data=class.mother;
+var e6;
+run;
+
+/*Want to use l9, l10, and l18*/
+/*91% never listen to radio,
+56% watch TV everyday 56%, 19% said never,
+96% never read newspaper
+97% never read magazines/tabloids
+How health information is best transmitted: 37% TV, 6% yes, 4% mobile phone, 2% newspaper, 3% magazine, billboard, portal, banner, poster all like 1% 
+Basically, they don't really want health information, but do it through the TV if you have to? They watch a lot of TV*/
+proc freq data=class.mother;
+tables l9 l13 l15 l18a l18b l18c l18d l18e l18f l18g l18h l18i l18k l18kl;
+run;
+/*TV stations they watch: 13% ANTV, 17% INDOSIAR, 13% MNCTV, 18% RCTI, 23% SCTV, same programs for next question*/
+proc freq data=class.mother;
+tables l10a1 l10a2;
+run;
+
+/*use G11*/
+/*child illnesses in past 2 weeks: 44% fever, 45% cough, 10% breathing problem, 5% breathing faster/gasping, 17% diarrhea 3+ times a day
+when child had diarrhea: 53% didn't change breastfeeding patterns, 29% changed breastfeeding patterns
+	of 29% that changed breastfeeding patterns, 75% gave more breastmilk, 23% gave less breastmilk
+	of 70% that didn't change breastfeeding patterns, 17% gave less liquids, 48% stayed same with liquids, 24% gave more liquids, 8% stopped giving liquids 
+	49% gave less food, 37% keep food same, 6% gave more
+Where they get medication when child is sick: private doctor 10%, health center 33%, village midwife 25%, private midwife 13%, village health post (not integrated health post) 11%
+62% were given vitamin A
+52% got complete immunization */
+proc freq data=class.mother;
+tables g1 g2 g3 g4 g5 g6 g7 g8 g10 
+g11a g11b g11c g11d g11e g11f g11g g11h g11i g11j g11k g11l g11m g11n g11o g11ol 
+g12 g13 g14;
+run;
+
+/*A3: 92% have electicity, 14% have radio, 84% cellphone, 73% have TV, 8% have computer, not a lot of transportation 59% have motorbike
+	because not a lot of transportation, health posts need to be close */
+Proc freq data=class.mother;
+tables a3a a3b a3c a3d a3e a3f a3g a3h a3i a3j;
+run;
+
+/*section K:
+k1: have you ever gotten info about child nutrition? 50/50 said they'd gotten info - PEOPLE NEED TO TELL PEOPLE THAT STUNTING AND NUTRITION ARE RELATED
+K2: when was the last time you got info?  54% less than 3 months, 12% 4-6 mo, 33% said 6+ months
+k3: Who gave you the info? 45% said midwife, 12% nutritionist, 11% said other health personel, 10% said neighbor/friend*, everything else small/
+K4: where you got child nutrition info? /*76% said integrated health post, 20% said health center, everything else small
+k7: where do you think you can get information about child nutrition? 30% said TV, everything else small */
+proc freq data = class.mother;
+tables k1 k2 k3 k4a k4b k4c k4d k4e k4f k4g k7a k7b k7c k7d k7e k7f;
+run;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
