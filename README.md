@@ -29,3 +29,9 @@ Less than 5% of respondents knew what stunting was, and half of respondents thou
 Generally, increased knowledge and education have been associated with improved health and knowledge of health. Counterintuitively, the results showed that increased wealth led to less stunting knowledge. This could be due to imperfect survey data, or some other factor. Perhaps weathier indonesians have less need for info on stunting, since they have enough money for food and don't experience as much stunting in their children?
 
 Survey results also indicated that many (91%) indonesian mothers had been to an Integrated Health Post, which is a small place where they can recieve health care. Community health workers could be trained to work with mothers and educate them on stunting and how to prevent it. Survey participants also reported that health data would be effectivly spread though TV and and posters. 
+
+The following images are a summary of the regression results
+
+![first results image](https://github.com/emariecovey/Indonesian_stunting_analysis/blob/main/images/results_1.png)
+
+![second results image](https://github.com/emariecovey/Indonesian_stunting_analysis/blob/main/images/results_2.png)
